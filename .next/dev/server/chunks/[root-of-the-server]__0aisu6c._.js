@@ -1,0 +1,172 @@
+module.exports = [
+"[externals]/child_process [external] (child_process, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("child_process", () => require("child_process"));
+
+module.exports = mod;
+}),
+"[externals]/fs [external] (fs, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("fs", () => require("fs"));
+
+module.exports = mod;
+}),
+"[externals]/fs/promises [external] (fs/promises, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("fs/promises", () => require("fs/promises"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/compiled/@opentelemetry/api [external] (next/dist/compiled/@opentelemetry/api, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("next/dist/compiled/@opentelemetry/api", () => require("next/dist/compiled/@opentelemetry/api"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/compiled/next-server/app-page-turbo.runtime.dev.js [external] (next/dist/compiled/next-server/app-page-turbo.runtime.dev.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js", () => require("next/dist/compiled/next-server/app-page-turbo.runtime.dev.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js [external] (next/dist/compiled/next-server/app-route-turbo.runtime.dev.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("next/dist/compiled/next-server/app-route-turbo.runtime.dev.js", () => require("next/dist/compiled/next-server/app-route-turbo.runtime.dev.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/server/app-render/work-async-storage.external.js [external] (next/dist/server/app-render/work-async-storage.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("next/dist/server/app-render/work-async-storage.external.js", () => require("next/dist/server/app-render/work-async-storage.external.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/server/app-render/work-unit-async-storage.external.js [external] (next/dist/server/app-render/work-unit-async-storage.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("next/dist/server/app-render/work-unit-async-storage.external.js", () => require("next/dist/server/app-render/work-unit-async-storage.external.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/server/runtime-reacts.external.js [external] (next/dist/server/runtime-reacts.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("next/dist/server/runtime-reacts.external.js", () => require("next/dist/server/runtime-reacts.external.js"));
+
+module.exports = mod;
+}),
+"[externals]/next/dist/shared/lib/no-fallback-error.external.js [external] (next/dist/shared/lib/no-fallback-error.external.js, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("next/dist/shared/lib/no-fallback-error.external.js", () => require("next/dist/shared/lib/no-fallback-error.external.js"));
+
+module.exports = mod;
+}),
+"[externals]/node:stream [external] (node:stream, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("node:stream", () => require("node:stream"));
+
+module.exports = mod;
+}),
+"[externals]/os [external] (os, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("os", () => require("os"));
+
+module.exports = mod;
+}),
+"[externals]/path [external] (path, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("path", () => require("path"));
+
+module.exports = mod;
+}),
+"[externals]/stream [external] (stream, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("stream", () => require("stream"));
+
+module.exports = mod;
+}),
+"[externals]/util [external] (util, cjs)", ((__turbopack_context__, module, exports) => {
+
+var mod = __turbopack_context__.x("util", () => require("util"));
+
+module.exports = mod;
+}),
+"[project]/app/api/extract-invoice/route.js [app-route] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+return __turbopack_context__.a(async (__turbopack_handle_async_dependencies__, __turbopack_async_result__) => { try {
+__turbopack_context__.s([
+    "POST",
+    ()=>POST
+]);
+var __TURBOPACK__imported__module__$5b$externals$5d2f$child_process__$5b$external$5d$__$28$child_process$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/child_process [external] (child_process, cjs)");
+var __TURBOPACK__imported__module__$5b$externals$5d2f$util__$5b$external$5d$__$28$util$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/util [external] (util, cjs)");
+var __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/fs/promises [external] (fs/promises, cjs)");
+var __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__ = __turbopack_context__.i("[externals]/path [external] (path, cjs)");
+var __TURBOPACK__imported__module__$5b$externals$5d2f$pdf$2d$extraction__$5b$external$5d$__$28$pdf$2d$extraction$2c$__cjs$2c$__$5b$project$5d2f$node_modules$2f$pdf$2d$extraction$29$__ = __turbopack_context__.i("[externals]/pdf-extraction [external] (pdf-extraction, cjs, [project]/node_modules/pdf-extraction)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$csvtojson$2f$v2$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/csvtojson/v2/index.js [app-route] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__ = __turbopack_context__.i("[externals]/@qvac/sdk [external] (@qvac/sdk, esm_import, [project]/node_modules/@qvac/sdk)");
+var __turbopack_async_dependencies__ = __turbopack_handle_async_dependencies__([
+    __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__
+]);
+[__TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__] = __turbopack_async_dependencies__.then ? (await __turbopack_async_dependencies__)() : __turbopack_async_dependencies__;
+;
+;
+;
+;
+;
+;
+;
+const execPromise = __TURBOPACK__imported__module__$5b$externals$5d2f$util__$5b$external$5d$__$28$util$2c$__cjs$29$__["default"].promisify(__TURBOPACK__imported__module__$5b$externals$5d2f$child_process__$5b$external$5d$__$28$child_process$2c$__cjs$29$__["exec"]);
+async function POST(request) {
+    try {
+        const data = await request.formData();
+        const file = data.get('file');
+        if (!file) return Response.json({
+            error: "No se subió archivo"
+        }, {
+            status: 400
+        });
+        // 1. Guardar archivo temporal
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const tempPdfPath = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'temp_factura.pdf');
+        const outDir = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'output');
+        // Aseguramos que la carpeta output exista
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__["default"].mkdir(outDir, {
+            recursive: true
+        });
+        await __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__["default"].writeFile(tempPdfPath, buffer);
+        // 2. Extraer solo la primera página para QVAC
+        const pdfData = await (0, __TURBOPACK__imported__module__$5b$externals$5d2f$pdf$2d$extraction__$5b$external$5d$__$28$pdf$2d$extraction$2c$__cjs$2c$__$5b$project$5d2f$node_modules$2f$pdf$2d$extraction$29$__["default"])(buffer);
+        const primeraPagina = pdfData.text.substring(0, 1500);
+        console.log("[SYS] Iniciando procesamiento paralelo (Python + QVAC)...");
+        // 3. Ejecución Paralela
+        const [pythonResult, qvacResult] = await Promise.all([
+            // Hilo 1: Script de Python
+            execPromise(`python3 procesar_factura.py ${tempPdfPath} ${outDir}`)
+        ]);
+        // 4. Leer el CSV generado y convertirlo a JSON
+        const csvFilePath = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(outDir, 'factura_items.csv');
+        const jsonProductos = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$csvtojson$2f$v2$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"])().fromFile(csvFilePath);
+        await (0, __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["close"])();
+        // 5. Devolver el JSON híbrido unificado
+        return Response.json({
+            status: "success",
+            remitente_destinatario: qvacResult,
+            productos: jsonProductos
+        });
+    } catch (error) {
+        console.error("[ERROR HÍBRIDO]", error);
+        try {
+            await (0, __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["close"])();
+        } catch (e) {}
+        return Response.json({
+            error: "Fallo en el motor híbrido"
+        }, {
+            status: 500
+        });
+    }
+}
+__turbopack_async_result__();
+} catch(e) { __turbopack_async_result__(e); } }, false);}),
+];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__0aisu6c._.js.map
