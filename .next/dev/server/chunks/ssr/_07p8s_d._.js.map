@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/gengisrovi/logisparse/app/layout.js"],"sourcesContent":["import './globals.css';\n\nexport const metadata = {\n    title: 'LogisParse-AI & Sovereign Node',\n    description: 'Edge AI Field Agent',\n};\n\nexport default function RootLayout({ children }) {\n    return (\n        <html lang=\"es\">\n            <head>\n                <script src=\"https://cdn.tailwindcss.com\"></script>\n            </head>\n            <body className=\"bg-slate-900 min-h-screen text-slate-100 antialiased\">\n                {children}\n            </body>\n        </html>\n    );\n}"],"names":["metadata","title","description","RootLayout","children","lang","src","className"],"mappings":";;;;;;;;;AAEO,MAAMA,WAAW;IACpBC,OAAO;IACPC,aAAa;AACjB;AAEe,SAASC,WAAW,EAAEC,QAAQ,EAAE;IAC3C,qBACI,8OAAC;QAAKC,MAAK;;0BACP,8OAAC;0BACG,cAAA,8OAAC;oBAAOC,KAAI;;;;;;;;;;;0BAEhB,8OAAC;gBAAKC,WAAU;0BACXH;;;;;;;;;;;;AAIjB"}},
+    {"offset": {"line": 57, "column": 0}, "map": {"version":3,"sources":["file:///Users/gengisrovi/logisparse/node_modules/next/src/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.ts"],"sourcesContent":["module.exports = (\n  require('../../module.compiled') as typeof import('../../module.compiled')\n).vendored['react-rsc']!.ReactJsxDevRuntime\n"],"names":["module","exports","require","vendored","ReactJsxDevRuntime"],"mappings":"AAAAA,OAAOC,OAAO,GACZC,QAAQ,4HACRC,QAAQ,CAAC,YAAY,CAAEC,kBAAkB","ignoreList":[0]}}]
+}

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file:///Users/gengisrovi/logisparse/app/globals.css"],"sourcesContent":[":root {\n    --background: #0f172a;\n    --foreground: #f8fafc;\n}\n\nbody {\n    background: var(--background);\n    color: var(--foreground);\n    font-family: system-ui, -apple-system, sans-serif;\n}"],"names":[],"mappings":"AAAA;;;;;AAKA"}}]
+}

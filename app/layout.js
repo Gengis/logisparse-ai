@@ -1,12 +1,19 @@
-import { Inter } from 'next/font/google';
+import './globals.css';
 
-
-const inter = Inter({ subsets: ['latin'] });
+export const metadata = {
+    title: 'LogisParse-AI & Sovereign Node',
+    description: 'Edge AI Field Agent',
+};
 
 export default function RootLayout({ children }) {
-  return (
-    <html lang="es" className={inter.className}>
-      <body>{children}</body>
-    </html>
-  );
+    return (
+        <html lang="es">
+            <head>
+                <script src="https://cdn.tailwindcss.com"></script>
+            </head>
+            <body className="bg-slate-900 min-h-screen text-slate-100 antialiased">
+                {children}
+            </body>
+        </html>
+    );
 }

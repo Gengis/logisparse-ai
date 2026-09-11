@@ -1,7 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    // Le decimos a Next.js que ignore estas librerías nativas en su empaquetado
-    serverExternalPackages: ['@qvac/sdk', 'pdf-extraction', 'tesseract.js'],
+    turbopack: {},
+    webpack: (config, { isServer }) => {
+        if (!isServer) {
+            config.resolve.fallback = {
+                ...config.resolve.fallback,
+                fs: false,
+                net: false,
+                tls: false,
+                module: false,
+                v8: false,
+                perf_hooks: false,
+            };
+        }
+        return config;
+    },
 };
 
 export default nextConfig;

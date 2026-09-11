@@ -6,13 +6,14 @@ export default function PhilipsMobileApp() {
     const [mensajes, setMensajes] = useState([{ rol: 'agente', texto: 'Sovereign Node Activo. ¿Qué equipo estás auditando hoy?' }]);
     const [input, setInput] = useState('');
     const [cargando, setCargando] = useState(false);
-    const [datosEquipo, setDatosEquipo] = useState({ equipo: null, marca: null, antiguedad: null, estado: null });
+
+    // Mantenemos null/vacío para que QVAC identifique que los campos están limpios
+    const [datosEquipo, setDatosEquipo] = useState({ equipo: null, marca: null, antiguedad: null, ubicacion: null, estado: null });
     const [grabando, setGrabando] = useState(false);
 
     const recognitionRef = useRef(null);
 
     const iniciarDictado = () => {
-        // Si ya está grabando, detenemos el micrófono manualmente
         if (grabando) {
             recognitionRef.current?.stop();
             return;
@@ -25,17 +26,15 @@ export default function PhilipsMobileApp() {
         recognitionRef.current = recognition;
         recognition.lang = 'es-ES';
 
-        // CAMBIOS CLAVE: Transcripción en vivo y control manual
         recognition.interimResults = true;
         recognition.continuous = true;
 
         recognition.onstart = () => {
             setGrabando(true);
-            setInput(''); // Limpiamos el input al empezar a hablar
+            setInput('');
         };
 
         recognition.onresult = (e) => {
-            // Concatenamos todo lo que va escuchando en tiempo real
             const textoActual = Array.from(e.results)
                 .map(resultado => resultado[0].transcript)
                 .join('');
@@ -53,6 +52,7 @@ export default function PhilipsMobileApp() {
 
         recognition.start();
     };
+
     const enviarMensaje = async (e) => {
         e.preventDefault();
         if (!input.trim()) return;
@@ -66,19 +66,19 @@ export default function PhilipsMobileApp() {
             const res = await fetch('/api/philips-insight', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mensaje: textoUsuario, contexto: datosEquipo }), // Inyectamos memoria
+                body: JSON.stringify({ mensaje: textoUsuario, contexto: datosEquipo }),
             });
             const data = await res.json();
 
             if (data.error) {
                 setMensajes((prev) => [...prev, { rol: 'agente', texto: 'Error de decodificación. ¿Puedes reformularlo?' }]);
             } else {
-                // Actualizamos el dashboard
                 setDatosEquipo({
-                    equipo: data.equipo || '-',
-                    marca: data.marca || '-',
-                    antiguedad: data.antiguedad || '-',
-                    estado: data.estado || '-'
+                    equipo: data.equipo && data.equipo !== '-' ? data.equipo : null,
+                    marca: data.marca && data.marca !== '-' ? data.marca : null,
+                    antiguedad: data.antiguedad && data.antiguedad !== '-' ? data.antiguedad : null,
+                    ubicacion: data.ubicacion && data.ubicacion !== '-' ? data.ubicacion : null,
+                    estado: data.estado && data.estado !== '-' ? data.estado : null
                 });
 
                 const respuestaAgente = data.pregunta_seguimiento
@@ -94,52 +94,82 @@ export default function PhilipsMobileApp() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 flex justify-center items-center">
-            {/* Contenedor tamaño celular */}
-            <div className="w-full max-w-md h-screen bg-gray-50 flex flex-col shadow-2xl relative overflow-hidden">
+        <div className="min-h-screen bg-slate-900 flex justify-center items-center p-2 md:p-4">
+            {/* Frame de dispositivo móvil */}
+            <div className="w-full max-w-md h-[92vh] max-h-[800px] bg-white flex flex-col rounded-3xl shadow-2xl relative overflow-hidden border border-slate-700">
 
-                {/* Cabecera Móvil */}
-                <div className="bg-blue-800 p-4 text-white flex justify-between items-start md:items-center gap-4 rounded-t-xl">
+                {/* Cabecera Móvil Estilizada */}
+                <div className="bg-blue-900 p-4 text-white flex justify-between items-center gap-3 shrink-0 border-b border-blue-800">
                     <div className="flex-1">
-                        <h2 className="font-bold text-lg flex items-center gap-2">
-                            <span className="bg-blue-500 p-1 rounded-full text-xs">SN</span> Sovereign Node
+                        <h2 className="font-bold text-base flex items-center gap-2">
+                            <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-black tracking-wider">SN</span>
+                            Sovereign Node
                         </h2>
-                        <p className="text-xs text-blue-200 mt-1">Philips Field Agent • Encriptación Edge</p>
+                        <p className="text-[11px] text-blue-200 mt-0.5">Philips Field Agent • Encriptación Edge</p>
                     </div>
 
-                    <Link href="/dashboard" className="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-2 rounded-lg font-bold transition-colors whitespace-nowrap shrink-0 mt-1 md:mt-0 shadow-sm border border-blue-700">
+                    <Link
+                        href="/dashboard"
+                        className="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shrink-0 border border-blue-400 shadow-sm active:scale-95"
+                    >
                         Dashboard 360
                     </Link>
                 </div>
 
-                {/* Dashboard de Datos (Tiempo Real) */}
-                <div className="bg-gray-100 p-2 rounded"><b>Equipo:</b> <span className="text-blue-600">{datosEquipo.equipo || '-'}</span></div>
-                <div className="bg-gray-100 p-2 rounded"><b>Marca:</b> <span className="text-blue-600">{datosEquipo.marca || '-'}</span></div>
-                <div className="bg-gray-100 p-2 rounded"><b>Edad:</b> <span className="text-blue-600">{datosEquipo.antiguedad || '-'}</span></div>
-                <div className="bg-gray-100 p-2 rounded"><b>Estado:</b> <span className="text-green-600 font-bold">{datosEquipo.estado || '-'}</span></div>
+                {/* Grid Ficha Técnica (Reestructurada de 2x2) */}
+                <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-slate-700 shrink-0 shadow-inner">
+                    <div className="truncate">
+                        <span className="font-bold text-slate-900">Equipo:</span>{' '}
+                        <span className="text-blue-700 font-semibold">{datosEquipo.equipo || '—'}</span>
+                    </div>
+                    <div className="truncate">
+                        <span className="font-bold text-slate-900">Marca:</span>{' '}
+                        <span className="text-blue-700 font-semibold">{datosEquipo.marca || '—'}</span>
+                    </div>
+                    <div className="truncate">
+                        <span className="font-bold text-slate-900">Edad:</span>{' '}
+                        <span className="text-blue-700 font-semibold">{datosEquipo.antiguedad || '—'}</span>
+                    </div>
+                    <div className="truncate">
+                        <span className="font-bold text-slate-900">Ubicación:</span>{' '}
+                        <span className="text-blue-700 font-semibold">{datosEquipo.ubicacion || '—'}</span>
+                    </div>
+                    <div className="truncate">
+                        <span className="font-bold text-slate-900">Estado:</span>{' '}
+                        <span className="text-emerald-600 font-semibold">{datosEquipo.estado || '—'}</span>
+                    </div>
+                </div>
 
                 {/* Chat Log */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
+                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
                     {mensajes.map((msg, i) => (
                         <div key={i} className={`flex ${msg.rol === 'tecnico' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.rol === 'tecnico' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'}`}>
+                            <div className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${msg.rol === 'tecnico'
+                                ? 'bg-blue-600 text-white rounded-tr-none shadow-sm'
+                                : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
+                                }`}>
                                 {msg.texto}
                             </div>
                         </div>
                     ))}
                     {cargando && (
                         <div className="flex justify-start">
-                            <div className="bg-white border p-3 rounded-2xl rounded-bl-none text-xs text-gray-400">QVAC analizando...</div>
+                            <div className="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none text-xs text-slate-400 animate-pulse shadow-sm">
+                                QVAC analizando en el borde...
+                            </div>
                         </div>
                     )}
                 </div>
 
-                {/* Input area con Audio */}
-                <form onSubmit={enviarMensaje} className="bg-white p-3 border-t flex items-center gap-2">
+                {/* Input area con dictado táctil */}
+                <form onSubmit={enviarMensaje} className="bg-white p-3 border-t border-slate-200 flex items-center gap-2 shrink-0">
                     <button
                         type="button"
                         onClick={iniciarDictado}
-                        className={`rounded-full min-w-[40px] h-10 flex justify-center items-center font-bold transition-all shadow-sm border ${grabando ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                        className={`rounded-full w-9 h-9 flex justify-center items-center text-sm font-bold transition-all shrink-0 border ${grabando
+                            ? 'bg-red-500 text-white animate-pulse border-red-600'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-300'
+                            }`}
                         title="Dictar por voz"
                     >
                         {grabando ? '⏹' : '🎙️'}
@@ -148,11 +178,16 @@ export default function PhilipsMobileApp() {
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder={grabando ? "Escuchando (habla ahora)..." : "Reporta el equipo hallado..."}
-                        className={`flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${grabando ? 'bg-red-50 text-red-700 placeholder-red-400' : ''}`}
+                        placeholder={grabando ? "Escuchando voz..." : "Reporta el equipo hallado..."}
+                        className={`flex-1 border rounded-full px-4 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 ${grabando ? 'bg-red-50 text-red-700 placeholder-red-400 border-red-300' : 'bg-slate-100 border-slate-200'
+                            }`}
                         disabled={cargando}
                     />
-                    <button type="submit" disabled={cargando || !input.trim()} className="bg-blue-600 disabled:bg-blue-300 text-white rounded-full min-w-[40px] h-10 flex justify-center items-center font-bold shadow-sm">
+                    <button
+                        type="submit"
+                        disabled={cargando || !input.trim()}
+                        className="bg-blue-600 disabled:bg-blue-300 text-white rounded-full w-9 h-9 flex justify-center items-center font-bold text-xs shrink-0 shadow-md transition-transform active:scale-95"
+                    >
                         ➤
                     </button>
                 </form>
