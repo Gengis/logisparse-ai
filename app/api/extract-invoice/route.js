@@ -4,10 +4,10 @@ import pdf from 'pdf-extraction';
 import { completion, LLAMA_3_2_1B_INST_Q4_0, loadModel, unloadModel, close } from "@qvac/sdk";
 
 export async function POST(request) {
-    try {
-        const data = await request.formData();
-        const file = data.get('file');
-        if (!file) return Response.json({ error: "Missing file payload" }, { status: 400 });
+  try {
+    const data = await request.formData();
+    const file = data.get('file');
+    if (!file) return Response.json({ error: "Missing file payload" }, { status: 400 });
 
         const buffer = Buffer.from(await file.arrayBuffer());
 
