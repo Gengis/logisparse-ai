@@ -1,12 +1,7 @@
-import { exec } from 'child_process';
-import util from 'util';
 import fs from 'fs/promises';
 import path from 'path';
 import pdf from 'pdf-extraction';
-import csv from 'csvtojson';
 import { completion, LLAMA_3_2_1B_INST_Q4_0, loadModel, unloadModel, close } from "@qvac/sdk";
-
-const execPromise = util.promisify(exec);
 
 export async function POST(request) {
   try {
@@ -14,62 +9,65 @@ export async function POST(request) {
     const file = data.get('file');
     if (!file) return Response.json({ error: "Missing file payload" }, { status: 400 });
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const tempPdfPath = path.join(process.cwd(), 'temp_factura.pdf');
-    const outDir = path.join(process.cwd(), 'output');
-    
-    await fs.mkdir(outDir, { recursive: true });
-    await fs.writeFile(tempPdfPath, buffer);
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-    const pdfData = await pdf(buffer);
-    const primeraPagina = pdfData.text.substring(0, 1500);
+        // 1. Extracción limpia de texto
+        const pdfData = await pdf(buffer);
+        const textoLimpio = pdfData.text.replace(/\s+/g, ' ');
 
-    // Lee la variable de entorno (.env.local) o usa 'python' por defecto en Windows
-    const pythonCommand = process.env.PYTHON_PATH || 'python';
+        // Truncamos inteligente: inicio (empresas) + final (totales e incoterms)
+        const textoParaIA = textoLimpio.substring(0, 2500) + "\n...\n" + textoLimpio.slice(-1500);
 
-    // Ejecución paralela restaurada
-    const [pythonResult, qvacResult] = await Promise.all([
-      execPromise(`${pythonCommand} procesar_factura.py ${tempPdfPath} ${outDir}`),
-      (async () => {
+        // 2. Extracción Cognitiva con QVAC (Cero dependencias de Python)
         const modelId = await loadModel({ modelSrc: LLAMA_3_2_1B_INST_Q4_0, modelType: "llm" });
+
         const history = [
-          { role: "system", content: "Eres un liquidador de aduanas. Extrae la empresa Remitente, empresa Destinataria y el Incoterm. Devuelve ÚNICAMENTE un JSON." },
-          { role: "user", content: `Analiza el encabezado.\nREGLAS ESTRICTAS:\n1. No uses nombres de cosméticos o perfumes.\n2. Busca entidades legales (S.A., Corp, LLC).\n3. Si no encuentras, usa "Desconocido".\n4. Los valores deben ser strings, no objetos.\n\nTEXTO:\n${primeraPagina}\n\nFORMATO:\n{"remitente": "", "destinatario": "", "incoterm": ""}` }
+            {
+                role: "system",
+                content: `Eres un liquidador de aduanas. Analiza el documento y extrae los datos generales de la transacción.
+DEVUELVE ÚNICAMENTE UN OBJETO JSON con las siguientes claves exactas:
+- "remitente": Nombre o razón social de la empresa emisora.
+- "destinatario": Nombre o razón social del cliente o comprador.
+- "incoterm": Término de comercio (ej. EXW, FOB, CIF).
+- "resumen_mercancia": Descripción breve de los productos detectados.
+- "monto_total": Monto final o total general de la factura.`
+            },
+            { role: "user", content: `TEXTO DE LA FACTURA:\n${textoParaIA}` }
         ];
-        
-        const result = completion({ modelId, history, stream: true });
+
+        const result = completion({ modelId, history, stream: true, format: "json" });
         let textoAcumulado = "";
         for await (const token of result.tokenStream) textoAcumulado += token;
-        
+
         await unloadModel({ modelId });
-        
+        await close();
+
+        // 3. Parsing del resultado
         const jsonMatch = textoAcumulado.match(/\{[\s\S]*\}/);
+        let qvacResult = {
+            remitente: "Desconocido",
+            destinatario: "Desconocido",
+            incoterm: "Desconocido",
+            resumen_mercancia: "No especificado",
+            monto_total: "No detectado"
+        };
+
         if (jsonMatch) {
-          try {
-            return JSON.parse(jsonMatch[0]);
-          } catch (e) {
-            console.warn("[WARN] JSON parse failed on QVAC output");
-            return { remitente: "Revisión manual", destinatario: "Revisión manual", incoterm: "Desconocido" };
-          }
+            try {
+                qvacResult = JSON.parse(jsonMatch[0]);
+            } catch (e) {
+                console.warn("[WARN] Parsing de JSON fallido, usando fallback.");
+            }
         }
-        return { remitente: "Desconocido", destinatario: "Desconocido", incoterm: "Desconocido" };
-      })()
-    ]);
 
-    const csvFilePath = path.join(outDir, 'factura_items.csv');
-    const jsonProductos = await csv().fromFile(csvFilePath);
+        return Response.json({
+            status: "success",
+            datos_generales: qvacResult
+        });
 
-    await close();
-    
-    return Response.json({
-      status: "success",
-      remitente_destinatario: qvacResult,
-      productos: jsonProductos
-    });
-
-  } catch (error) {
-    console.error("[ERR_HYBRID_ENGINE]", error);
-    try { await close(); } catch(e){} 
-    return Response.json({ error: "Pipeline failure" }, { status: 500 });
-  }
+    } catch (error) {
+        console.error("[ERR_QVAC_ENGINE]", error);
+        try { await close(); } catch (e) { }
+        return Response.json({ error: "Fallo en el procesamiento local de la factura" }, { status: 500 });
+    }
 }
