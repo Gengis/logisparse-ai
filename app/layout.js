@@ -1,10 +1,7 @@
 import { Inter } from 'next/font/google';
 
-export const metadata = {
-    title: 'IA Soberana - Hackathon',
-    description: 'Procesamiento local seguro sin la nube',
-    manifest: '/manifest.json',
-};
+
+const inter = Inter({ subsets: ['latin'] });
 
 export default function RootLayout({ children }) {
   return (
