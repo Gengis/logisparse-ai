@@ -28,7 +28,7 @@ export default function Page() {
             <div className="max-w-2xl w-full p-6 bg-white rounded-xl shadow-md border border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Captura de Base Instalada (Philips)</h2>
                 <textarea
-                    className="w-full p-4 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700"
+                    className="w-full p-4 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700 outline-none"
                     rows="4"
                     placeholder="Ej: Estoy en Hospital DemoCare... Tienen dos resonadores..."
                     value={observacion}
@@ -42,7 +42,7 @@ export default function Page() {
                     <button
                         onClick={enviarObservacion}
                         disabled={loading}
-                        className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                        className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
                     >
                         {loading ? '🧠 Procesando en dispositivo...' : 'Extraer Datos'}
                     </button>

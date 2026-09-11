@@ -49,7 +49,7 @@ function Page() {
                     columnNumber: 17
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("textarea", {
-                    className: "w-full p-4 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700",
+                    className: "w-full p-4 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 text-gray-700 outline-none",
                     rows: "4",
                     placeholder: "Ej: Estoy en Hospital DemoCare... Tienen dos resonadores...",
                     value: observacion,
@@ -73,7 +73,7 @@ function Page() {
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                             onClick: enviarObservacion,
                             disabled: loading,
-                            className: "px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50",
+                            className: "px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer",
                             children: loading ? '🧠 Procesando en dispositivo...' : 'Extraer Datos'
                         }, void 0, false, {
                             fileName: "[project]/app/page.js",

@@ -121,45 +121,84 @@ async function POST(request) {
         const data = await request.formData();
         const file = data.get('file');
         if (!file) return Response.json({
-            error: "No se subió archivo"
+            error: "Missing file payload"
         }, {
             status: 400
         });
-        // 1. Guardar archivo temporal
         const buffer = Buffer.from(await file.arrayBuffer());
         const tempPdfPath = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'temp_factura.pdf');
         const outDir = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'output');
-        // Aseguramos que la carpeta output exista
         await __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__["default"].mkdir(outDir, {
             recursive: true
         });
         await __TURBOPACK__imported__module__$5b$externals$5d2f$fs$2f$promises__$5b$external$5d$__$28$fs$2f$promises$2c$__cjs$29$__["default"].writeFile(tempPdfPath, buffer);
-        // 2. Extraer solo la primera página para QVAC
         const pdfData = await (0, __TURBOPACK__imported__module__$5b$externals$5d2f$pdf$2d$extraction__$5b$external$5d$__$28$pdf$2d$extraction$2c$__cjs$2c$__$5b$project$5d2f$node_modules$2f$pdf$2d$extraction$29$__["default"])(buffer);
         const primeraPagina = pdfData.text.substring(0, 1500);
-        console.log("[SYS] Iniciando procesamiento paralelo (Python + QVAC)...");
-        // 3. Ejecución Paralela
+        // Lee la variable de entorno (.env.local) o usa 'python' por defecto en Windows
+        const pythonCommand = process.env.PYTHON_PATH || 'python';
+        // Ejecución paralela restaurada
         const [pythonResult, qvacResult] = await Promise.all([
-            // Hilo 1: Script de Python
-            execPromise(`python3 procesar_factura.py ${tempPdfPath} ${outDir}`)
+            execPromise(`${pythonCommand} procesar_factura.py ${tempPdfPath} ${outDir}`),
+            (async ()=>{
+                const modelId = await (0, __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["loadModel"])({
+                    modelSrc: __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["LLAMA_3_2_1B_INST_Q4_0"],
+                    modelType: "llm"
+                });
+                const history = [
+                    {
+                        role: "system",
+                        content: "Eres un liquidador de aduanas. Extrae la empresa Remitente, empresa Destinataria y el Incoterm. Devuelve ÚNICAMENTE un JSON."
+                    },
+                    {
+                        role: "user",
+                        content: `Analiza el encabezado.\nREGLAS ESTRICTAS:\n1. No uses nombres de cosméticos o perfumes.\n2. Busca entidades legales (S.A., Corp, LLC).\n3. Si no encuentras, usa "Desconocido".\n4. Los valores deben ser strings, no objetos.\n\nTEXTO:\n${primeraPagina}\n\nFORMATO:\n{"remitente": "", "destinatario": "", "incoterm": ""}`
+                    }
+                ];
+                const result = (0, __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["completion"])({
+                    modelId,
+                    history,
+                    stream: true
+                });
+                let textoAcumulado = "";
+                for await (const token of result.tokenStream)textoAcumulado += token;
+                await (0, __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["unloadModel"])({
+                    modelId
+                });
+                const jsonMatch = textoAcumulado.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    try {
+                        return JSON.parse(jsonMatch[0]);
+                    } catch (e) {
+                        console.warn("[WARN] JSON parse failed on QVAC output");
+                        return {
+                            remitente: "Revisión manual",
+                            destinatario: "Revisión manual",
+                            incoterm: "Desconocido"
+                        };
+                    }
+                }
+                return {
+                    remitente: "Desconocido",
+                    destinatario: "Desconocido",
+                    incoterm: "Desconocido"
+                };
+            })()
         ]);
-        // 4. Leer el CSV generado y convertirlo a JSON
         const csvFilePath = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(outDir, 'factura_items.csv');
         const jsonProductos = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$csvtojson$2f$v2$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"])().fromFile(csvFilePath);
         await (0, __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["close"])();
-        // 5. Devolver el JSON híbrido unificado
         return Response.json({
             status: "success",
             remitente_destinatario: qvacResult,
             productos: jsonProductos
         });
     } catch (error) {
-        console.error("[ERROR HÍBRIDO]", error);
+        console.error("[ERR_HYBRID_ENGINE]", error);
         try {
             await (0, __TURBOPACK__imported__module__$5b$externals$5d2f40$qvac$2f$sdk__$5b$external$5d$__$2840$qvac$2f$sdk$2c$__esm_import$2c$__$5b$project$5d2f$node_modules$2f40$qvac$2f$sdk$29$__["close"])();
         } catch (e) {}
         return Response.json({
-            error: "Fallo en el motor híbrido"
+            error: "Pipeline failure"
         }, {
             status: 500
         });
