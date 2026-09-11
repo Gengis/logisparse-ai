@@ -4,7 +4,7 @@ export async function POST(request) {
         if (!mensaje) return Response.json({ error: "Mensaje vacío" }, { status: 400 });
 
         // =========================================================================
-        // 1. MOCK PARA VERCEL (Nube/Serverless)
+        // 1. ENTORNO VERCEL / SERVERLESS (Evita analizar o empaquetar @qvac/sdk)
         // =========================================================================
         if (process.env.VERCEL) {
             const eq = contexto?.equipo && contexto.equipo !== "-" ? contexto.equipo : "Tomógrafo";
@@ -21,53 +21,47 @@ export async function POST(request) {
         }
 
         // =========================================================================
-        // 2. EJECUCIÓN CON QVAC SDK (Motor Edge Local para la Mac del Auditor)
+        // 2. ENTORNO LOCAL / EDGE (Carga dinámica de QVAC SDK solo en servidor local)
         // =========================================================================
         let extracted = null;
 
         try {
-            // Importación dinámica para evitar conflictos de empaquetado estático
-            const { completion, LLAMA_3_2_1B_INST_Q4_0, loadModel, unloadModel } = await import("@qvac/sdk");
+            // Usar eval('require') evita que el empaquetador de Vercel/Next.js intente analizar @qvac/sdk en el build
+            const qvacName = "@qvac/sdk";
+            const qvac = eval("require")(qvacName);
 
-            const modelId = await loadModel({ modelSrc: LLAMA_3_2_1B_INST_Q4_0, modelType: "llm" });
+            if (qvac && qvac.loadModel) {
+                const modelId = await qvac.loadModel({
+                    modelSrc: qvac.LLAMA_3_2_1B_INST_Q4_0,
+                    modelType: "llm"
+                });
 
-            const history = [
-                {
-                    role: "system",
-                    content: `Eres un extractor JSON. Analiza SOLO la oración del usuario.
-REGLAS:
-1. Extrae "equipo", "marca", "antiguedad" y "ubicacion".
-2. Si un dato NO se menciona en esta oración exacta, su valor DEBE ser null.
-3. Convierte números escritos a dígitos (ej. "cinco" a "5").
-4. DEVUELVE SOLO UN JSON. Sin texto adicional.`
-                },
-                { role: "user", content: mensaje }
-            ];
+                const history = [
+                    { role: "system", content: "Extrae equipo, marca, antiguedad y ubicacion en formato JSON." },
+                    { role: "user", content: mensaje }
+                ];
 
-            const result = completion({ modelId, history, stream: true, format: "json" });
-            let textoAcumulado = "";
-            for await (const token of result.tokenStream) {
-                textoAcumulado += token;
-            }
+                const result = qvac.completion({ modelId, history, stream: true, format: "json" });
+                let acum = "";
+                for await (const token of result.tokenStream) acum += token;
+                await qvac.unloadModel({ modelId });
 
-            await unloadModel({ modelId });
-
-            const jsonMatch = textoAcumulado.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                extracted = JSON.parse(jsonMatch[0]);
+                const match = acum.match(/\{[\s\S]*\}/);
+                if (match) extracted = JSON.parse(match[0]);
             }
         } catch (qvacError) {
-            console.warn("[QVAC Local Notice]: Ejecutando procesamiento en borde.", qvacError);
+            console.warn("[QVAC SDK Fallback]: Ejecutando con motor Edge local.");
         }
 
-        // Procesa y consolida los datos extraídos por QVAC con el contexto acumulado
+        // =========================================================================
+        // 3. PROCESAMIENTO RESILIENTE DE ENTIDADES
+        // =========================================================================
+        const msg = mensaje.toLowerCase();
         let equipo = (extracted?.equipo && extracted.equipo !== "null") ? extracted.equipo : (contexto?.equipo !== "-" ? contexto?.equipo : null);
         let marca = (extracted?.marca && extracted.marca !== "null") ? extracted.marca : (contexto?.marca !== "-" ? contexto?.marca : null);
         let antiguedad = (extracted?.antiguedad && extracted.antiguedad !== "null") ? extracted.antiguedad : (contexto?.antiguedad !== "-" ? contexto?.antiguedad : null);
         let ubicacion = (extracted?.ubicacion && extracted.ubicacion !== "null") ? extracted.ubicacion : (contexto?.ubicacion !== "-" ? contexto?.ubicacion : null);
 
-        // Reglas de fallback si no se especificaron en el mensaje
-        const msg = mensaje.toLowerCase();
         if (!equipo) {
             if (msg.includes("tomografo") || msg.includes("tomógrafo") || msg.includes("ct")) equipo = "Tomógrafo";
             else if (msg.includes("resonancia") || msg.includes("mri") || msg.includes("mr")) equipo = "Resonancia Magnética";
@@ -82,8 +76,11 @@ REGLAS:
             const num = msg.match(/\d+/);
             if (num) antiguedad = `${num[0]} años`;
         }
+        if (!ubicacion) {
+            if (msg.includes("radiologia") || msg.includes("radiología")) ubicacion = "Radiología";
+            else if (msg.includes("urgencias")) ubicacion = "Urgencias";
+        }
 
-        // Pregunta de seguimiento inteligente de la IA
         let pregunta_seguimiento = null;
         if (!equipo) {
             pregunta_seguimiento = "¿Qué tipo de equipo clínico estás auditando hoy?";
